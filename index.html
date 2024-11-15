@@ -23,8 +23,9 @@
         let mediaRecorder;
         let audioChunks = [];
 
+        // 開始錄音
         document.getElementById('startBtn').addEventListener('click', function() {
-            // 啟動錄音
+            // 獲取使用者音訊
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function(stream) {
                     mediaRecorder = new MediaRecorder(stream);
@@ -41,12 +42,12 @@
                         const formData = new FormData();
                         formData.append('audio_file', audioBlob, 'recorded_audio.wav');
 
-                        // 上傳音檔到後端
-                        fetch('/process_audio', {
+                        // 發送音檔到後端處理
+                        fetch('/process_audio', {  // 確保這個 URL 和後端匹配
                             method: 'POST',
                             body: formData
                         })
-                        .then(response => response.json())
+                        .then(response => response.json())  // 確保後端回傳 JSON 格式
                         .then(data => {
                             if (data.error) {
                                 document.getElementById('status').textContent = '語音轉錄失敗。';
@@ -65,8 +66,8 @@
             document.getElementById('startBtn').disabled = true;
         });
 
+        // 停止錄音
         document.getElementById('stopBtn').addEventListener('click', function() {
-            // 停止錄音
             mediaRecorder.stop();
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
