@@ -1,0 +1,98 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder</title>
+    <style>
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 100%;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Voice Recorder</h1>
+    <p>Click "Start Recording" to begin speaking. When you're finished, click "Stop Recording".</p>
+
+    <!-- 語言選擇下拉框 -->
+    <label for="language">Choose a language:</label>
+    <select id="language">
+        <option value="en-US">English (US)</option>
+        <option value="zh-TW">Chinese (Traditional)</option>
+        <option value="es-ES">Spanish</option>
+        <option value="fr-FR">French</option>
+        <option value="de-DE">German</option>
+    </select>
+
+    <br><br>
+
+    <button id="start-recording" onclick="startRecording()">Start Recording</button>
+    <button id="stop-recording" onclick="stopRecording()" disabled>Stop Recording</button>
+    
+    <div id="result">Your transcription will appear here.</div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // 開始錄音
+        function startRecording() {
+            audioChunks = [];
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        uploadAudio(audioBlob);
+                    };
+                    mediaRecorder.start();
+                    document.getElementById("start-recording").disabled = true;
+                    document.getElementById("stop-recording").disabled = false;
+                });
+        }
+
+        // 停止錄音
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById("start-recording").disabled = false;
+            document.getElementById("stop-recording").disabled = true;
+        }
+
+        // 上傳錄製的音頻到後端進行語音識別
+        function uploadAudio(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'audio.wav');
+            
+            // 從下拉選單中獲取選擇的語言
+            const language = document.getElementById("language").value;
+
+            // 在請求中附加語言選擇
+            formData.append('language', language);
+
+            fetch('/upload_audio', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.transcription) {
+                    document.getElementById("result").innerText = data.transcription;
+                } else {
+                    document.getElementById("result").innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                document.getElementById("result").innerText = "Error: " + error;
+            });
+        }
+    </script>
+</body>
+</html>
