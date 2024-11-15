@@ -1,9 +1,9 @@
   <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Recorder</title>
+    <title>語音轉錄分析</title>
     <style>
         #result {
             margin-top: 20px;
@@ -16,13 +16,13 @@
 </head>
 <body>
     <h1>Voice Recorder</h1>
-    <p>Click "Start Recording" to begin speaking. When you're finished, click "Stop Recording".</p>
+    <p>點擊"開始錄音"以開始錄音，錄音結束時點擊"停止錄音"</p>
 
     <!-- 語言選擇下拉框 -->
     <label for="language">Choose a language:</label>
     <select id="language">
         <option value="en-US">English (US)</option>
-        <option value="zh-TW">Chinese (Traditional)</option>
+        <option value="zh-TW">中文 (Traditional)</option>
         <option value="es-ES">Spanish</option>
         <option value="fr-FR">French</option>
         <option value="de-DE">German</option>
@@ -40,7 +40,7 @@
         let audioChunks = [];
 
         // 開始錄音
-        function startRecording() {
+        function 開始錄音() {
             audioChunks = [];
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(stream => {
@@ -60,7 +60,7 @@
         }
 
         // 停止錄音
-        function stopRecording() {
+        function 停止錄音() {
             mediaRecorder.stop();
             document.getElementById("start-recording").disabled = false;
             document.getElementById("stop-recording").disabled = true;
