@@ -16,10 +16,10 @@
 </head>
 <body>
     <h1>語音轉錄分析</h1>
-    <p>點擊"開始錄音"以開始錄音，錄音結束時點擊"停止錄音"</p>
+    <p>點擊"開始錄音"以開始錄音，錄音結束時點擊"停止錄音"。</p>
 
     <!-- 語言選擇下拉框 -->
-    <label for="language">Choose a language:</label>
+    <label for="language">選擇對話語言:</label>
     <select id="language">
         <option value="en-US">English (US)</option>
         <option value="zh-TW">中文 (Traditional)</option>
@@ -30,10 +30,10 @@
 
     <br><br>
 
-    <button id="開始錄音" onclick="startRecording()">Start Recording</button>
-    <button id="停止錄音" onclick="stopRecording()" disabled>Stop Recording</button>
+    <button id="start-recording" onclick="startRecording()">開始錄音</button>
+    <button id="stop-recording" onclick="stopRecording()" disabled>停止錄音</button>
     
-    <div id="result">Your transcription will appear here.</div>
+    <div id="result">你的對話內容將會顯示在這裡。</div>
 
     <script>
         let mediaRecorder;
