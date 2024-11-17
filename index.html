@@ -43,7 +43,7 @@
                         formData.append('audio_file', audioBlob, 'recorded_audio.wav');
 
                         // 發送音檔到後端處理
-                        fetch('https://speech-ai-1.onrender.com/process_audio', {  // 使用完整後端 URL
+                        fetch('https://api.render.com/deploy/srv-cssiid8gph6c73969ptg?key=C0Wb1Go2iHo/process_audio', {  // 使用完整後端 URL
                             method: 'POST',
                             body: formData
                         })
