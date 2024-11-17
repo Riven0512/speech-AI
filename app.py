@@ -1,42 +1,40 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # 导入 CORS 扩展
 import speech_recognition as sr
-import os
+import logging
 
 app = Flask(__name__)
 
 # 启用 CORS，允许所有源访问
 CORS(app)
 
-# 設置音頻保存的路徑
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# 设置日志记录
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/process_audio', methods=['POST'])
 def process_audio():
-    # 確認是否包含音頻文件
     if 'audio_file' not in request.files:
+        app.logger.error("No audio file provided")
         return jsonify({'error': 'No audio file provided'}), 400
     
     audio_file = request.files['audio_file']
     
-    # 保存音頻文件
-    audio_path = os.path.join(UPLOAD_FOLDER, 'uploaded_audio.wav')
+    # 保存音频文件到本地
+    audio_path = 'uploaded_audio.wav'
     audio_file.save(audio_path)
 
-    # 使用 SpeechRecognition 進行語音轉錄
+    # 使用 SpeechRecognition 进行转录
     recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_path) as source:
-        audio = recognizer.record(source)  # 读取音频
-
     try:
-        transcription = recognizer.recognize_google(audio, language='zh-TW')  # 使用 Google 語音識別
+        with sr.AudioFile(audio_path) as source:
+            audio = recognizer.record(source)  # 读取音频
+        transcription = recognizer.recognize_google(audio, language='zh-TW')  # 使用 Google 的语音识别
         return jsonify({'transcription': transcription})
     except sr.UnknownValueError:
+        app.logger.error("Could not understand the audio")
         return jsonify({'error': 'Could not understand audio'}), 500
     except sr.RequestError as e:
+        app.logger.error(f"Speech recognition service error: {e}")
         return jsonify({'error': f'Speech recognition service error: {e}'}), 500
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
