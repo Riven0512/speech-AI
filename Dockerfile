@@ -20,3 +20,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 容器啟動時運行的命令，通常是啟動 Flask 應用
 CMD ["python", "app.py"]
 EXPOSE 5000
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
