@@ -1,5 +1,0 @@
-flask
-gunicorn
-flask-cors
-SpeechRecognition==3.11.0
-pyaudio==0.2.14
