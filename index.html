@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>醫生語音轉錄系統</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Transcription and Summary</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>醫生語音轉錄系統</h1>
-        <div>
-            <label for="language">選擇語言：</label>
-            <select id="language">
-                <option value="en-US">English</option>
-                <option value="zh-TW">中文 (繁體)</option>
-                <option value="ja-JP">日本語</option>
-            </select>
-        </div>
-        <div>
-            <label for="audio">上傳語音檔案：</label>
-            <input type="file" id="audio" accept="audio/*">
-        </div>
-        <button id="transcribeButton">轉錄並摘要</button>
-        <div id="output">
-            <h2>轉錄結果</h2>
-            <pre id="transcript"></pre>
-            <h2>摘要</h2>
-            <pre id="summary"></pre>
-        </div>
-    </div>
-    <script src="script.js"></script>
+  <h1>語音轉文字與摘要</h1>
+  <form id="uploadForm">
+    <label for="language">選擇語言：</label>
+    <select id="language" name="language">
+      <option value="en">English</option>
+      <option value="zh">中文</option>
+      <option value="es">Español</option>
+    </select>
+    <br><br>
+    <label for="audioFile">上傳語音文件：</label>
+    <input type="file" id="audioFile" name="file" accept="audio/*" required>
+    <br><br>
+    <button type="submit">提交</button>
+  </form>
+  <div id="result">
+    <h2>結果</h2>
+    <p><strong>轉錄內容：</strong></p>
+    <p id="transcription"></p>
+    <p><strong>摘要：</strong></p>
+    <p id="summary"></p>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
