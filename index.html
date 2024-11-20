@@ -1,77 +1,34 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>語音錄製與轉錄</title>
-    <style>
-        #status {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-    </style>
+    <title>醫生語音轉錄系統</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>語音錄製與轉錄</h1>
-    <button id="startBtn">開始錄音</button>
-    <button id="stopBtn" disabled>停止錄音</button>
-    
-    <div id="status">請按下「開始錄音」來錄製您的語音。</div>
-
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-
-        // 開始錄音
-        document.getElementById('startBtn').addEventListener('click', function() {
-            // 獲取使用者音訊
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(function(stream) {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
-
-                    document.getElementById('status').textContent = '錄音中...';
-
-                    mediaRecorder.ondataavailable = function(event) {
-                        audioChunks.push(event.data);
-                    };
-
-                    mediaRecorder.onstop = function() {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const formData = new FormData();
-                        formData.append('audio_file', audioBlob, 'recorded_audio.wav');
-
-                        // 發送音檔到後端處理
-                        fetch('https://speech-ai-1.onrender.com/process_audio', {  // 使用完整後端 URL
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())  // 確保後端回傳 JSON 格式
-                        .then(data => {
-                            if (data.error) {
-                                document.getElementById('status').textContent = '語音轉錄失敗。';
-                            } else {
-                                document.getElementById('status').textContent = '轉錄結果: ' + data.transcription;
-                            }
-                        })
-                        .catch(error => {
-                            document.getElementById('status').textContent = '發生錯誤: ' + error;
-                        });
-                    };
-
-                    document.getElementById('stopBtn').disabled = false;
-                });
-            
-            document.getElementById('startBtn').disabled = true;
-        });
-
-        // 停止錄音
-        document.getElementById('stopBtn').addEventListener('click', function() {
-            mediaRecorder.stop();
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-        });
-    </script>
+    <div class="container">
+        <h1>醫生語音轉錄系統</h1>
+        <div>
+            <label for="language">選擇語言：</label>
+            <select id="language">
+                <option value="en-US">English</option>
+                <option value="zh-TW">中文 (繁體)</option>
+                <option value="ja-JP">日本語</option>
+            </select>
+        </div>
+        <div>
+            <label for="audio">上傳語音檔案：</label>
+            <input type="file" id="audio" accept="audio/*">
+        </div>
+        <button id="transcribeButton">轉錄並摘要</button>
+        <div id="output">
+            <h2>轉錄結果</h2>
+            <pre id="transcript"></pre>
+            <h2>摘要</h2>
+            <pre id="summary"></pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
