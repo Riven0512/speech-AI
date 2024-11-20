@@ -14,7 +14,7 @@ document.getElementById("uploadForm").addEventListener("submit", async (event) =
   summaryEl.textContent = "Loading...";
 
   try {
-    const response = await fetch("https://<your-backend-url>/transcribe", {
+    const response = await fetch("http://localhost:8000/transcribe", {
       method: "POST",
       body: formData,
     });
