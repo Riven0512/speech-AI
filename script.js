@@ -1,28 +1,35 @@
-document.getElementById('transcribeButton').addEventListener('click', async () => {
-    const audioFile = document.getElementById('audio').files[0];
-    const language = document.getElementById('language').value;
+document.getElementById("uploadForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-    if (!audioFile) {
-        alert("請上傳語音檔案！");
-        return;
+  const formData = new FormData();
+  formData.append("language", document.getElementById("language").value);
+  formData.append("file", document.getElementById("audioFile").files[0]);
+
+  const resultDiv = document.getElementById("result");
+  const transcriptionEl = document.getElementById("transcription");
+  const summaryEl = document.getElementById("summary");
+
+  resultDiv.style.display = "none";
+  transcriptionEl.textContent = "Loading...";
+  summaryEl.textContent = "Loading...";
+
+  try {
+    const response = await fetch("https://<your-backend-url>/transcribe", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+    if (response.ok) {
+      transcriptionEl.textContent = data.transcription;
+      summaryEl.textContent = data.summary;
+    } else {
+      transcriptionEl.textContent = "Error: " + data.error;
+      summaryEl.textContent = "";
     }
+  } catch (error) {
+    transcriptionEl.textContent = "Error: " + error.message;
+    summaryEl.textContent = "";
+  }
 
-    const formData = new FormData();
-    formData.append("file", audioFile);
-    formData.append("language", language);
-
-    try {
-        // 調用後端 API 進行轉錄
-        const response = await fetch("https://<你的後端域名>/transcribe", {
-            method: "POST",
-            body: formData,
-        });
-        const data = await response.json();
-
-        document.getElementById('transcript').textContent = data.transcription || "轉錄失敗！";
-        document.getElementById('summary').textContent = data.summary || "摘要生成失敗！";
-    } catch (error) {
-        console.error("發生錯誤：", error);
-        alert("無法處理請求！");
-    }
+  resultDiv.style.display = "block";
 });
