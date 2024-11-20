@@ -14,7 +14,7 @@ document.getElementById("uploadForm").addEventListener("submit", async (event) =
   summaryEl.textContent = "Loading...";
 
   try {
-    const response = await fetch("http://localhost:8000/transcribe", {
+    const response = await fetch("https://speech-ai.onrender.com/transcribe", {
       method: "POST",
       body: formData,
     });
