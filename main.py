@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket
 from google.cloud import speech
-import os
+import json
 
 app = FastAPI()
 
@@ -10,6 +10,9 @@ client = speech.SpeechClient()
 @app.websocket("/transcribe")
 async def transcribe_audio(websocket: WebSocket):
     await websocket.accept()
+    
+    # 首先接收語言代碼
+    language_code = await websocket.receive_text()
 
     while True:
         try:
@@ -21,7 +24,7 @@ async def transcribe_audio(websocket: WebSocket):
             config = speech.RecognitionConfig(
                 encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
                 sample_rate_hertz=16000,
-                language_code="en-US",  # 可更改為其他語言代碼
+                language_code=language_code,  # 使用動態語言代碼
             )
 
             # 呼叫 Google Speech-to-Text API
@@ -32,5 +35,5 @@ async def transcribe_audio(websocket: WebSocket):
                 await websocket.send_text(result.alternatives[0].transcript)
 
         except Exception as e:
-            await websocket.send_text(f"Error: {str(e)}")
+            await websocket.send_text(json.dumps({"error": str(e)}))
             break
