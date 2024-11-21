@@ -1,35 +1,37 @@
-document.getElementById("uploadForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
+const languageSelect = document.getElementById("languageSelect");
+const startButton = document.getElementById("startButton");
+let websocket;
 
-  const formData = new FormData();
-  formData.append("language", document.getElementById("language").value);
-  formData.append("file", document.getElementById("audioFile").files[0]);
+startButton.addEventListener("click", () => {
+    const languageCode = languageSelect.value;
+    const serverURL = "wss://<your-render-url>/transcribe"; // Replace <your-render-url> with Render URL
+    websocket = new WebSocket(serverURL);
 
-  const resultDiv = document.getElementById("result");
-  const transcriptionEl = document.getElementById("transcription");
-  const summaryEl = document.getElementById("summary");
+    websocket.onopen = () => {
+        console.log("WebSocket connected");
+    };
 
-  resultDiv.style.display = "none";
-  transcriptionEl.textContent = "Loading...";
-  summaryEl.textContent = "Loading...";
+    websocket.onmessage = (event) => {
+        const transcription = document.getElementById("transcription");
+        transcription.innerText += event.data + "\n";
+    };
 
-  try {
-    const response = await fetch("https://speech-ai.onrender.com/transcribe", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    if (response.ok) {
-      transcriptionEl.textContent = data.transcription;
-      summaryEl.textContent = data.summary;
-    } else {
-      transcriptionEl.textContent = "Error: " + data.error;
-      summaryEl.textContent = "";
-    }
-  } catch (error) {
-    transcriptionEl.textContent = "Error: " + error.message;
-    summaryEl.textContent = "";
-  }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+            const audioContext = new AudioContext();
+            const mediaRecorder = audioContext.createScriptProcessor(4096, 1, 1);
+            const source = audioContext.createMediaStreamSource(stream);
 
-  resultDiv.style.display = "block";
+            source.connect(mediaRecorder);
+            mediaRecorder.connect(audioContext.destination);
+
+            mediaRecorder.onaudioprocess = (event) => {
+                const audioData = event.inputBuffer.getChannelData(0);
+                const int16Array = new Int16Array(audioData.map((n) => n * 0x7FFF));
+                websocket.send(int16Array);
+            };
+        })
+        .catch((err) => {
+            console.error("Error accessing microphone:", err);
+        });
 });
