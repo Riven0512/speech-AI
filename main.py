@@ -1,39 +1,36 @@
-import whisper
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from transformers import pipeline
+from fastapi import FastAPI, WebSocket
+from google.cloud import speech
 import os
 
 app = FastAPI()
 
-# 加載 Whisper 模型
-whisper_model = whisper.load_model("base")
-# 加載 Hugging Face 摘要模型
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# 初始化 Google Speech-to-Text 客戶端
+client = speech.SpeechClient()
 
-# 定義返回格式
-class TranscriptionResponse(BaseModel):
-    transcription: str
-    summary: str
+@app.websocket("/transcribe")
+async def transcribe_audio(websocket: WebSocket):
+    await websocket.accept()
 
-@app.post("/transcribe", response_model=TranscriptionResponse)
-async def transcribe(file: UploadFile = File(...), language: str = Form("en")):
-    temp_file = f"temp_{file.filename}"
-    with open(temp_file, "wb") as f:
-        f.write(file.file.read())
-    
-    try:
-        # Whisper 語音轉文字
-        transcription_result = whisper_model.transcribe(temp_file, language=language)
-        transcription = transcription_result["text"]
-        
-        # 生成摘要
-        summary = summarizer(transcription, max_length=100, min_length=30, do_sample=False)[0]['summary_text']
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    finally:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-    
-    return TranscriptionResponse(transcription=transcription, summary=summary)
+    while True:
+        try:
+            # 接收音頻數據
+            audio_data = await websocket.receive_bytes()
+
+            # 配置語音識別
+            audio = speech.RecognitionAudio(content=audio_data)
+            config = speech.RecognitionConfig(
+                encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+                sample_rate_hertz=16000,
+                language_code="en-US",  # 可更改為其他語言代碼
+            )
+
+            # 呼叫 Google Speech-to-Text API
+            response = client.recognize(config=config, audio=audio)
+
+            # 傳回識別結果
+            for result in response.results:
+                await websocket.send_text(result.alternatives[0].transcript)
+
+        except Exception as e:
+            await websocket.send_text(f"Error: {str(e)}")
+            break
