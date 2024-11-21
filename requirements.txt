@@ -1,6 +1,3 @@
 fastapi
 uvicorn
-transformers
-torch
-whisper
-python-multipart
+google-cloud-speech
