@@ -4,16 +4,24 @@ let websocket;
 
 startButton.addEventListener("click", () => {
     const languageCode = languageSelect.value;
-    const serverURL = "wss://<your-render-url>/transcribe"; // Replace <your-render-url> with Render URL
+    const serverURL = "wss://<your-render-url>/transcribe"; // 替換為 Render 後端 URL
     websocket = new WebSocket(serverURL);
 
     websocket.onopen = () => {
         console.log("WebSocket connected");
+        websocket.send(languageCode); // 首先發送語言代碼
     };
 
     websocket.onmessage = (event) => {
         const transcription = document.getElementById("transcription");
-        transcription.innerText += event.data + "\n";
+        try {
+            const data = JSON.parse(event.data);
+            if (data.error) {
+                transcription.innerText += `Error: ${data.error}\n`;
+            }
+        } catch {
+            transcription.innerText += event.data + "\n";
+        }
     };
 
     navigator.mediaDevices.getUserMedia({ audio: true })
