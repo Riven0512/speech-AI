@@ -4,12 +4,12 @@ let websocket;
 
 startButton.addEventListener("click", () => {
     const languageCode = languageSelect.value;
-    const serverURL = "wss://<your-render-url>/transcribe"; // 替換為 Render 後端 URL
+    const serverURL = "wss://<your-render-url>/transcribe"; 
     websocket = new WebSocket(serverURL);
 
     websocket.onopen = () => {
         console.log("WebSocket connected");
-        websocket.send(languageCode); // 首先發送語言代碼
+        websocket.send(languageCode); 
     };
 
     websocket.onmessage = (event) => {
